@@ -207,16 +207,34 @@
         <div class="cart-total">Total: ৳<span id="total-price">0.00</span></div>
         <button class="btn" style="margin-top:25px; background: #25D366;" onclick="checkoutWhatsApp()">Checkout via WhatsApp</button>
     </div>
+<script type="module">
+      // Import the functions you need from the SDKs you need
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
+      // TODO: Add SDKs for Firebase products that you want to use
+      // https://firebase.google.com/docs/web/setup#available-libraries
 
+      // Your web app's Firebase configuration
+      const firebaseConfig = {
+        apiKey: "AIzaSyB1OGG8izV5YpQMajWsNHZxPEBCyUNnzlM",
+        authDomain: "flixstore-7945a.firebaseapp.com",
+        projectId: "flixstore-7945a",
+        storageBucket: "flixstore-7945a.firebasestorage.app",
+        messagingSenderId: "227012172770",
+        appId: "1:227012172770:web:c1ae4ba7ba9661ef40f7bb"
+      };
+
+      // Initialize Firebase
+      const app = initializeApp(firebaseConfig);
+    </script>
     <script>
         // Mock product database (Updated to BDT ৳ currency for local relevance)
        const products = [
-    { id: 1, name: "Netflix", price: 500.00, img: "netflix.jpg" },
-    { id: 2, name: "PrimeVideo", price: 150.00, img: "primevideo.jpg" },
-    { id: 3, name: "Spotify", price: 250.00, img: "spotify.jpg" },
-    { id: 4, name: "ChatGpt", price: 499.00, img: "chatgpt.jpg" },
-    { id: 5, name: "Crunchyroll", price: 299.00, img: "crunchyroll.jpg" },
-    { id: 6, name: "Google One", price: 499.00, img: "Googleone.jpg" }
+    { id: 1, name: "Netflix", price: 500.00, img: "images/netflix.jpg" },
+    { id: 2, name: "PrimeVideo", price: 150.00, img: "images/primevideo.jpg" },
+    { id: 3, name: "Spotify", price: 250.00, img: "images/spotify.jpg" },
+    { id: 4, name: "ChatGpt", price: 499.00, img: "images/chatgpt.jpg" },
+    { id: 5, name: "Crunchyroll", price: 299.00, img: "images/crunchyroll.jpg" },
+    { id: 6, name: "Google One", price: 499.00, img: "images/Googleone.jpg" }
 ];
 
         let cart = [];
