@@ -6,7 +6,6 @@
     <title>Flixstore | Quality Products</title>
     <style>
         :root {
-            /* Updated to a modern, trustworthy blue for Flixstore */
             --primary: #2563eb; 
             --primary-hover: #1d4ed8;
             --bg-color: #f8fafc;
@@ -72,11 +71,18 @@
             max-width: 1400px;
             margin: 0 auto;
         }
+        h2 {
+            margin-top: 40px;
+            margin-bottom: 20px;
+            color: #1e293b;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 10px;
+        }
         .products { 
             display: grid; 
             grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); 
             gap: 25px; 
-            padding-bottom: 50px;
+            padding-bottom: 20px;
         }
         .product-card { 
             background: #fff; 
@@ -194,8 +200,21 @@
     </div>
 
     <div class="container">
+        <!-- Section 1: Featured Collection -->
         <h2>Featured Collection</h2>
-        <div class="products" id="product-list">
+        <div class="products" id="featured-list">
+            <!-- Products will be injected here by JavaScript -->
+        </div>
+
+        <!-- Section 2: Entertainment -->
+        <h2>Entertainment</h2>
+        <div class="products" id="entertainment-list">
+            <!-- Products will be injected here by JavaScript -->
+        </div>
+
+        <!-- Section 3: All Products -->
+        <h2>All Products</h2>
+        <div class="products" id="all-products-list">
             <!-- Products will be injected here by JavaScript -->
         </div>
     </div>
@@ -207,13 +226,10 @@
         <div class="cart-total">Total: ৳<span id="total-price">0.00</span></div>
         <button class="btn" style="margin-top:25px; background: #25D366;" onclick="checkoutWhatsApp()">Checkout via WhatsApp</button>
     </div>
-<script type="module">
-      // Import the functions you need from the SDKs you need
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
-      // TODO: Add SDKs for Firebase products that you want to use
-      // https://firebase.google.com/docs/web/setup#available-libraries
 
-      // Your web app's Firebase configuration
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
+
       const firebaseConfig = {
         apiKey: "AIzaSyB1OGG8izV5YpQMajWsNHZxPEBCyUNnzlM",
         authDomain: "flixstore-7945a.firebaseapp.com",
@@ -223,36 +239,50 @@
         appId: "1:227012172770:web:c1ae4ba7ba9661ef40f7bb"
       };
 
-      // Initialize Firebase
       const app = initializeApp(firebaseConfig);
     </script>
+    
     <script>
-        // Mock product database (Updated to BDT ৳ currency for local relevance)
-       const products = [
-    { id: 1, name: "Netflix", price: 499.00, img: "netflix2.png" },
-    { id: 2, name: "PrimeVideo", price: 150.00, img: "prime.png" },
-    { id: 3, name: "Spotify", price: 250.00, img: "Spotify.png" },
-    { id: 4, name: "ChatGpt", price: 499.00, img: "Chatgpt.png" },
-    { id: 5, name: "Crunchyroll", price: 299.00, img: "crunchy.png" },
-    { id: 6, name: "Google One", price: 499.00, img: "Googleone.png" }
-];
+        const products = [
+            { id: 1, name: "Netflix", price: 499.00, img: "netflix2.png" },
+            { id: 2, name: "PrimeVideo", price: 150.00, img: "prime.png" },
+            { id: 3, name: "Spotify", price: 250.00, img: "Spotify.png" },
+            { id: 4, name: "ChatGpt", price: 499.00, img: "Chatgpt.png" },
+            { id: 5, name: "Crunchyroll", price: 299.00, img: "crunchy.png" },
+            { id: 6, name: "Google One", price: 499.00, img: "Googleone.png" }
+        ];
 
         let cart = [];
 
-        // Render products to the DOM
-        function renderProducts() {
-            const list = document.getElementById('product-list');
-            list.innerHTML = products.map(p => `
+        // Helper function to generate HTML for a product card
+        function createProductCardHTML(p) {
+            return `
                 <div class="product-card">
                     <img src="${p.img}" alt="${p.name}">
                     <h3>${p.name}</h3>
                     <div class="price">৳${p.price.toLocaleString()}</div>
                     <button class="btn" onclick="addToCart(${p.id})">Add to Cart</button>
                 </div>
-            `).join('');
+            `;
         }
 
-        // Add item to cart and open sidebar
+        // Render products into their specific sections
+        function renderProducts() {
+            // 1. Featured Collection (Netflix id:1, PrimeVideo id:2)
+            const featuredList = document.getElementById('featured-list');
+            const featuredProducts = products.filter(p => p.name === "Netflix" || p.name === "PrimeVideo");
+            featuredList.innerHTML = featuredProducts.map(createProductCardHTML).join('');
+
+            // 2. Entertainment (Netflix id:1, PrimeVideo id:2, Spotify id:3, Crunchyroll id:5)
+            const entertainmentList = document.getElementById('entertainment-list');
+            const entertainmentProducts = products.filter(p => ["Netflix", "PrimeVideo", "Spotify", "Crunchyroll"].includes(p.name));
+            entertainmentList.innerHTML = entertainmentProducts.map(createProductCardHTML).join('');
+
+            // 3. All Products (Everything in the array)
+            const allProductsList = document.getElementById('all-products-list');
+            allProductsList.innerHTML = products.map(createProductCardHTML).join('');
+        }
+
         function addToCart(id) {
             const product = products.find(p => p.id === id);
             cart.push(product);
@@ -260,7 +290,6 @@
             document.getElementById('cart-sidebar').classList.add('open');
         }
 
-        // Update cart UI and totals
         function updateCart() {
             document.getElementById('cart-count').innerText = cart.length;
             const cartItems = document.getElementById('cart-items');
@@ -285,17 +314,15 @@
             document.getElementById('total-price').innerText = total.toLocaleString();
         }
 
-        // Remove item from cart array
         function removeFromCart(index) {
             cart.splice(index, 1);
             updateCart();
         }
 
-        // Toggle sidebar visibility
         function toggleCart() {
             document.getElementById('cart-sidebar').classList.toggle('open');
         }
-// Checkout via WhatsApp
+
         function checkoutWhatsApp() {
             if (cart.length === 0) {
                 alert("Your cart is empty!");
@@ -311,13 +338,13 @@
             const total = cart.reduce((sum, item) => sum + item.price, 0);
             message += `\n*Total: ৳${total}*\n\nPlease let me know the bKash number to send the payment.`;
 
-            // Replace with your actual number!
             const whatsappNumber = "8801343546958"; 
             
             const whatsappURL = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
             
             window.open(whatsappURL, '_blank');
         }
+
         // Initialize store
         renderProducts();
         updateCart();
