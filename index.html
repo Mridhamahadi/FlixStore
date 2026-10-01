@@ -244,7 +244,7 @@
     <script>
         // High-quality Unsplash source images replacing local assets
         const products = [
-            { id: 1, name: "Netflix", price: 499.00, img: "netflix2.png" },
+            { id: 1, name: "Netflix", price: 299.00, img: "netflix2.png" },
             { id: 2, name: "PrimeVideo", price: 150.00, img: "prime.png" },
             { id: 3, name: "Spotify", price: 250.00, img: "Spotify.png" },
             { id: 4, name: "ChatGpt", price: 499.00, img: "Chatgpt.png" },
@@ -254,8 +254,27 @@
 
         let cart = [];
 
+        // Helper function to calculate price with discounts
+        function calculatePrice(basePrice, months) {
+            if (months === 3) {
+                return (basePrice * 3) * 0.90; // 10% discount for 3 months
+            }
+            return basePrice;
+        }
+
+        // Update price display dynamically on the card
+        function updatePriceDisplay(productId, uniqueId) {
+            const product = products.find(p => p.id === productId);
+            const selectEl = document.getElementById(`validity-${uniqueId}`);
+            const months = parseInt(selectEl.value);
+            const newPrice = calculatePrice(product.price, months);
+            
+            document.getElementById(`price-display-${uniqueId}`).innerText = `৳${newPrice.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+        }
+
         // Helper function to generate HTML for a product card with digital theme
-        function createProductCardHTML(p) {
+        function createProductCardHTML(p, instancePrefix) {
+            const uniqueId = `${instancePrefix}-${p.id}`;
             return `
                 <div class="glass-card rounded-2xl p-4 flex flex-col group relative overflow-hidden">
                     <!-- Glow effect behind image -->
@@ -269,12 +288,28 @@
                     <div class="relative z-10 flex-grow flex flex-col justify-between">
                         <div>
                             <h3 class="text-xl font-bold text-white mb-1 group-hover:text-blue-400 transition-colors">${p.name}</h3>
-                            <div class="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 mb-5">
-                                ৳${p.price.toLocaleString()}
+                            <div class="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 mb-3">
+                                <span id="price-display-${uniqueId}">৳${p.price.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                            </div>
+                            
+                            <!-- Validity Selector -->
+                            <div class="mb-5">
+                                <label class="text-xs text-slate-400 mb-1.5 block uppercase tracking-wider font-semibold">Select Validity</label>
+                                <div class="relative">
+                                    <select id="validity-${uniqueId}" onchange="updatePriceDisplay(${p.id}, '${uniqueId}')" class="w-full bg-slate-900/80 border border-white/10 rounded-xl px-3 py-2.5 text-slate-200 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none appearance-none transition-all cursor-pointer">
+                                        <option value="1">1 Month</option>
+                                        <option value="3">3 Months (10% Off)</option>
+                                    </select>
+                                    <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none text-slate-400">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                        </svg>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         
-                        <button onclick="addToCart(${p.id})" class="w-full relative overflow-hidden rounded-full py-3 bg-white/5 border border-white/10 hover:border-blue-500/50 hover:bg-blue-500/10 transition-all duration-300 font-semibold text-sm text-white group/btn">
+                        <button onclick="addToCart(${p.id}, '${uniqueId}')" class="w-full relative overflow-hidden rounded-full py-3 bg-white/5 border border-white/10 hover:border-blue-500/50 hover:bg-blue-500/10 transition-all duration-300 font-semibold text-sm text-white group/btn">
                             <span class="relative z-10 flex justify-center items-center gap-2">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -292,19 +327,30 @@
         function renderProducts() {
             const featuredList = document.getElementById('featured-list');
             const featuredProducts = products.filter(p => p.name === "Netflix" || p.name === "PrimeVideo");
-            featuredList.innerHTML = featuredProducts.map(createProductCardHTML).join('');
+            featuredList.innerHTML = featuredProducts.map(p => createProductCardHTML(p, 'feat')).join('');
 
             const entertainmentList = document.getElementById('entertainment-list');
             const entertainmentProducts = products.filter(p => ["Netflix", "PrimeVideo", "Spotify", "Crunchyroll"].includes(p.name));
-            entertainmentList.innerHTML = entertainmentProducts.map(createProductCardHTML).join('');
+            entertainmentList.innerHTML = entertainmentProducts.map(p => createProductCardHTML(p, 'ent')).join('');
 
             const allProductsList = document.getElementById('all-products-list');
-            allProductsList.innerHTML = products.map(createProductCardHTML).join('');
+            allProductsList.innerHTML = products.map(p => createProductCardHTML(p, 'all')).join('');
         }
 
-        function addToCart(id) {
-            const product = products.find(p => p.id === id);
-            cart.push(product);
+        function addToCart(productId, uniqueId) {
+            const product = products.find(p => p.id === productId);
+            const selectEl = document.getElementById(`validity-${uniqueId}`);
+            const months = parseInt(selectEl.value);
+            const finalPrice = calculatePrice(product.price, months);
+
+            const cartItem = {
+                ...product,
+                cartItemId: Date.now() + Math.random(), // Unique ID for cart management
+                months: months,
+                price: finalPrice
+            };
+            
+            cart.push(cartItem);
             updateCart();
             
             // Auto open sidebar on add
@@ -341,10 +387,13 @@
                         <div class="w-10 h-10 rounded-lg overflow-hidden bg-slate-800 flex-shrink-0">
                             <img src="${item.img}" class="w-full h-full object-cover opacity-80" alt="${item.name}">
                         </div>
-                        <span class="font-semibold text-slate-200">${item.name}</span>
+                        <div class="flex flex-col">
+                            <span class="font-semibold text-slate-200">${item.name}</span>
+                            <span class="text-xs text-slate-400">${item.months} Month${item.months > 1 ? 's' : ''}</span>
+                        </div>
                     </div>
                     <div class="flex items-center gap-4">
-                        <span class="font-bold text-cyan-400">৳${item.price.toLocaleString()}</span>
+                        <span class="font-bold text-cyan-400">৳${item.price.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
                         <button onclick="removeFromCart(${index})" class="w-8 h-8 flex items-center justify-center rounded-full bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition-all">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -400,11 +449,11 @@
             let message = "Hello Flixstore! I would like to order:\n\n";
             
             cart.forEach((item, index) => {
-                message += `${index + 1}. ${item.name} - ৳${item.price}\n`;
+                message += `${index + 1}. ${item.name} (${item.months} Month${item.months > 1 ? 's' : ''}) - ৳${item.price.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}\n`;
             });
 
             const total = cart.reduce((sum, item) => sum + item.price, 0);
-            message += `\n*Total: ৳${total}*\n\nPlease let me know the bKash number to send the payment.`;
+            message += `\n*Total: ৳${total.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}*\n\nPlease let me know the bKash number to send the payment.`;
 
             const whatsappNumber = "8801343546958"; 
             const whatsappURL = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
